@@ -206,17 +206,20 @@
       <div class="instructions">
         <h3>📋 How to Complete This Survey</h3>
         <ol>
-          <li>Click the "View Brand Designs" button below to open our Google Drive folder</li>
+          <li>Click the "View All Brand Designs" button below to open our Google Drive folder</li>
           <li>Review each PDF design carefully in the folder</li>
           <li>Return to this survey and fill out your information</li>
           <li>Select your top 3 favorite designs in order of preference</li>
           <li>Tell us why you chose your first choice as your favorite</li>
         </ol>
-        <a href="https://drive.google.com/drive/folders/1bi_ZsFnUFj98THWbQooTX3luTV2kG2wK" 
+        <a href="https://drive.google.com/drive/folders/1bi_ZsFnUFj98THWbQooTX3luTV2kG2wK?usp=sharing" 
            target="_blank" 
            class="view-designs-btn">
           View All Brand Designs
         </a>
+        <div style="margin-top: 1rem; padding: 0.75rem; background-color: rgba(255, 255, 255, 0.1); border-radius: 6px; border-left: 3px solid #ffcc00;">
+          <strong>Note:</strong> If you have trouble accessing the designs, please ensure you're logged into your Google account. If the issue persists, you can request direct access by emailing the survey administrator.
+        </div>
       </div>
     </div>
 
@@ -304,8 +307,9 @@
             </select>
           </div>
           
-          <div id="rankingError" class="error-message">
-            Please select different designs for each ranking
+        <div class="input-group">
+            <label>Explain why you chose your 1st choice</label>
+            <textarea name="firstChoiceReason" required placeholder="Please share what you liked about your first choice..."></textarea>
           </div>
         </div>
 
@@ -397,7 +401,7 @@ document.getElementById('surveyForm').addEventListener('submit', (e) => {
   const form = document.createElement('form');
   form.method = 'POST';
   form.action = 'https://script.google.com/macros/s/AKfycbxZcSX2ZOBDnS0orkHtDq3-OQwFHPPONSpapWNDyuBjlnYzvyHVU0MMQ2-A1LabA7fc/exec';
-  form.target = '_blank'; // This will open response in new tab, helpful for debugging
+  form.target = '_self'; // Changed from _blank to _self to avoid opening in new tab
 
   // Add all form fields
   formData.forEach((value, key) => {
