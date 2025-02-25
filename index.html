@@ -384,9 +384,10 @@ document.getElementById('surveyForm').addEventListener('submit', (e) => {
   const rank3 = document.getElementById('rank3').value;
   
   // Prevent submission if there are duplicate selections
-  if (rank1 && rank2 && rank1 === rank2 || 
-      rank1 && rank3 && rank1 === rank3 || 
-      rank2 && rank3 && rank2 === rank3) {
+  if ((rank1 && rank2 && rank1 === rank2) || 
+      (rank1 && rank3 && rank1 === rank3) || 
+      (rank2 && rank3 && rank2 === rank3)) {
+    document.getElementById('rankingError').classList.add('visible');
     return;
   }
 
@@ -397,33 +398,10 @@ document.getElementById('surveyForm').addEventListener('submit', (e) => {
   // Get the form data
   const formData = new FormData(e.target);
   
-  // Create a form element
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = 'https://script.google.com/macros/s/AKfycbxZcSX2ZOBDnS0orkHtDq3-OQwFHPPONSpapWNDyuBjlnYzvyHVU0MMQ2-A1LabA7fc/exec';
-  form.target = '_self'; // Changed from _blank to _self to avoid opening in new tab
-
-  // Add all form fields
-  formData.forEach((value, key) => {
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = key;
-    input.value = value;
-    form.appendChild(input);
-  });
-
-  // Add the form to the document and submit it
-  document.body.appendChild(form);
-  form.submit();
-  document.body.removeChild(form);
-
-  // Reset form and button state
-  setTimeout(() => {
-    submitButton.disabled = false;
-    submitButton.textContent = 'Submit Survey';
-    e.target.reset();
-    alert('Thank you for completing the survey!');
-  }, 1000);
+  // Direct form submission to the new URL
+  e.target.method = 'POST';
+  e.target.action = 'https://script.google.com/macros/s/AKfycbzmC7FqHyAo_G5k0Jdhe9CEF_JN1c-uxF3Xu0UEJeRkE9RRJCAYYpc77D70ahPK4w2E/exec';
+  e.target.submit();
 });
   </script>
 </body>
