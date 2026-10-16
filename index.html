@@ -661,6 +661,38 @@
       flex-direction: column;
       gap: 0.45rem;
     }
+
+    .header-top-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-test-fill {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      color: #b45309;
+      padding: 0.55rem 1.1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-test-fill:hover {
+      background: #fde68a;
+      border-color: #d97706;
+      color: #92400e;
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 <body>
@@ -668,9 +700,16 @@
   <div class="container">
     
     <header class="header">
-      <span class="header-badge">Assessment &amp; Audit Framework</span>
-      <h1>Operational &amp; Workflow Assessment</h1>
-      <p>Role Analysis, Task Breakdown &amp; Time Allocation Audit.</p>
+      <div class="header-top-row">
+        <div>
+          <span class="header-badge">Assessment &amp; Audit Framework</span>
+          <h1>Operational &amp; Workflow Assessment</h1>
+          <p>Role Analysis, Task Breakdown &amp; Time Allocation Audit.</p>
+        </div>
+        <button type="button" class="btn-test-fill" id="testFillBtnTop" onclick="fillTestData()">
+          ⚡ Test Fill Data
+        </button>
+      </div>
     </header>
 
     <div id="thankYouContainer" style="display: none;"></div>
@@ -1443,13 +1482,165 @@
         <div id="validationAlert" class="alert-error">
           ⚠️ Section 2 Time Allocation must total exactly 100% before submitting.
         </div>
-        <button type="submit" class="btn-submit" id="submitBtn">Submit Assessment</button>
+        <div style="display: flex; gap: 0.85rem; justify-content: center; align-items: center; flex-wrap: wrap;">
+          <button type="button" class="btn-test-fill" id="testFillBtnBottom" onclick="fillTestData()" style="padding: 0.9rem 1.5rem; font-size: 0.95rem;">
+            ⚡ Test Fill Data
+          </button>
+          <button type="submit" class="btn-submit" id="submitBtn">Submit Assessment</button>
+        </div>
       </div>
 
     </form>
   </div>
 
   <script>
+    // --- 0. 1-Click Test Fill Data ---
+    function fillTestData() {
+      // Mode: Self (Employee)
+      const selfRadio = document.querySelector('input[name="completedBy"][value="Self (Employee)"]');
+      if (selfRadio) {
+        selfRadio.checked = true;
+        toggleInterviewerField();
+      }
+
+      // Section 1: Baseline & Network
+      const fullNameSelect = document.getElementById('fullName');
+      fullNameSelect.value = 'Morgan Dixon';
+      handleFullNameChange(fullNameSelect);
+
+      document.getElementById('jobTitle').value = 'Operations & Systems Lead (TEST SUBMISSION)';
+      document.getElementById('department').value = 'Operations & Technology';
+
+      const supervisorSelect = document.getElementById('supervisor');
+      supervisorSelect.value = 'Scott Malm';
+      handleSupervisorChange(supervisorSelect);
+
+      document.getElementById('directReports').value = 'Ethan Skelton, Connor Leavitt';
+      document.getElementById('collaborators').value = 'Scott Malm, Anne Maxson, Tyler Dodd, Amanda Barry, Sarah Hsu';
+
+      // Section 2: Time Allocation (Totals 100%)
+      document.getElementById('timeRev').value = 15;
+      document.querySelector('input[name="tasksRev"]').value = 'Grant deliverables, partner scoping, and contract reporting';
+
+      document.getElementById('timeClin').value = 0;
+      document.querySelector('input[name="tasksClin"]').value = 'N/A (Non-clinical operations & technical role)';
+
+      document.getElementById('timeNonClin').value = 45;
+      document.querySelector('input[name="tasksNonClin"]').value = 'OHA survey platform deployment, data pipeline automation, and project execution';
+
+      document.getElementById('timeRes').value = 15;
+      document.querySelector('input[name="tasksRes"]').value = 'Evaluating AI workflow automation, EHR data integration, and cloud tooling';
+
+      document.getElementById('timeLearn').value = 10;
+      document.querySelector('input[name="tasksLearn"]').value = 'Azure Static Web Apps architecture, Apps Script automation, and compliance standards';
+
+      document.getElementById('timeAdmin').value = 15;
+      document.querySelector('input[name="tasksAdmin"]').value = 'Daily standups, Slack/email triage, cross-team syncs, and sprint planning';
+
+      updatePercentages();
+
+      // Section 3: 30-Minute Daily Schedule Grid
+      const sampleSlots = {
+        '9:00 AM - 9:30 AM': { task: 'Morning inbox, Slack triage & daily priority review', cat: 'Email / Slack / Triage', notes: 'Review overnight alerts & OHA form submissions' },
+        '9:30 AM - 10:00 AM': { task: 'Operations & Tech daily standup', cat: 'Meetings & Syncs', notes: 'Sync with Scott, Tyler, and tech team on blockers' },
+        '10:00 AM - 10:30 AM': { task: 'Deep focus: Data pipeline & survey architecture', cat: 'Focus / Project Work', notes: 'OHA Year 3 evaluation portal & Google Sheets sync' },
+        '10:30 AM - 11:00 AM': { task: 'Deep focus: Data pipeline & survey architecture', cat: 'Focus / Project Work', notes: 'Automated validation & tab routing verification' },
+        '11:00 AM - 11:30 AM': { task: 'Cross-functional stakeholder check-in', cat: 'Meetings & Syncs', notes: 'Review deliverable timelines with program leads' },
+        '11:30 AM - 12:00 PM': { task: 'Ticket & backlog triage', cat: 'Operations / Admin', notes: 'Assign incoming technical requests' },
+        '12:00 PM - 12:30 PM': { task: 'Lunch / Midday Break', cat: 'Lunch / Break', notes: 'Midday break' },
+        '12:30 PM - 1:00 PM': { task: 'Lunch / Walk', cat: 'Lunch / Break', notes: 'Step away from desk' },
+        '1:00 PM - 1:30 PM': { task: '1-on-1 supervision & team mentorship', cat: 'Meetings & Syncs', notes: 'Weekly direct report syncs' },
+        '1:30 PM - 2:00 PM': { task: 'Dashboard & reporting development', cat: 'Focus / Project Work', notes: 'PowerBI / Azure static app updates' },
+        '2:00 PM - 2:30 PM': { task: 'Dashboard & reporting development', cat: 'Focus / Project Work', notes: 'QA testing and deployment verification' },
+        '2:30 PM - 3:00 PM': { task: 'Grant deliverables & documentation', cat: 'Focus / Project Work', notes: 'Update technical specs and audit logs' },
+        '3:00 PM - 3:30 PM': { task: 'Internal research & workflow automation', cat: 'Focus / Project Work', notes: 'Prototype script automation to reduce manual entry' },
+        '3:30 PM - 4:00 PM': { task: 'Afternoon Slack/email catch-up', cat: 'Email / Slack / Triage', notes: 'Clear partner questions and follow-ups' },
+        '4:00 PM - 4:30 PM': { task: 'System QA & deployment checks', cat: 'Operations / Admin', notes: 'Verify production builds and cloud sync status' },
+        '4:30 PM - 5:00 PM': { task: 'End-of-day wrap-up & next-day planning', cat: 'Operations / Admin', notes: 'Log completed tasks and set tomorrow priorities' }
+      };
+
+      document.querySelectorAll('#scheduleBody tr').forEach(tr => {
+        const slot = tr.getAttribute('data-slot');
+        const data = sampleSlots[slot];
+        if (data) {
+          tr.querySelector('.sched-task').value = data.task;
+          tr.querySelector('.sched-cat').value = data.cat;
+          tr.querySelector('.sched-notes').value = data.notes;
+        }
+      });
+
+      document.getElementById('projectRotationNotes').value = 'Mornings (10 AM–12 PM) and early afternoons (1:30–3:30 PM) are reserved for deep project blocks on 1–2 core technical deliverables per day, while mornings/late afternoons handle triage and cross-team syncs.';
+      document.getElementById('periodicLoops').value = 'Weekly Monday sprint & priority planning, bi-weekly grant deliverable audits, and monthly cloud infrastructure & license reviews.';
+
+      // Check Task Origin boxes
+      const targetOrigins = [
+        'Direct requests from supervisor',
+        'Scheduled recurring calendar blocks',
+        'Self-directed backlog',
+        'Self directed long term grant goal submissions'
+      ];
+      document.querySelectorAll('input[name="originCheckbox"]').forEach(cb => {
+        cb.checked = targetOrigins.includes(cb.value);
+      });
+
+      document.getElementById('bottlenecks').value = 'Manual data formatting between disparate survey exports and reporting spreadsheets—currently being automated via direct Google Apps Script web app pipelines.';
+
+      // Section 4: Tools & Software Inventory
+      const toolsBody = document.getElementById('toolsBody');
+      toolsBody.innerHTML = '';
+      const sampleTools = [
+        { name: 'Google Workspace & Apps Script', purpose: 'Automated survey collection, Sheets sync, and docs', freq: 'Daily', tier: 'Business Standard', cost: 'Centralized' },
+        { name: 'Microsoft Azure (Static Web Apps)', purpose: 'Hosting evaluation portals and internal web applications', freq: 'Daily', tier: 'Pay-As-You-Go', cost: '~$15/mo' },
+        { name: 'GitHub & VS Code', purpose: 'Source control, CI/CD deployments, and application development', freq: 'Daily', tier: 'Team / Pro', cost: 'Centralized' }
+      ];
+      sampleTools.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="text" class="tool-name" value="${t.name}"></td>
+          <td><input type="text" class="tool-purpose" value="${t.purpose}"></td>
+          <td>
+            <select class="tool-freq">
+              <option value="Daily" ${t.freq === 'Daily' ? 'selected' : ''}>Daily</option>
+              <option value="Weekly" ${t.freq === 'Weekly' ? 'selected' : ''}>Weekly</option>
+              <option value="Monthly" ${t.freq === 'Monthly' ? 'selected' : ''}>Monthly</option>
+              <option value="As Needed" ${t.freq === 'As Needed' ? 'selected' : ''}>As Needed</option>
+            </select>
+          </td>
+          <td><input type="text" class="tool-tier" value="${t.tier}"></td>
+          <td><input type="text" class="tool-cost" value="${t.cost}"></td>
+          <td><button type="button" class="btn-del-row" onclick="deleteToolRow(this)">✕</button></td>
+        `;
+        toolsBody.appendChild(tr);
+      });
+
+      document.getElementById('unusedTools').value = 'Legacy standalone form builders replaced by custom HTML + Google Sheets integration';
+      document.getElementById('outOfPocket').value = 'None';
+
+      // Section 5: Learning Goals & Skill Development
+      document.getElementById('learningObjectives').value = 'Expanding automated data pipelines between EHR/survey frontends and centralized analytics dashboards.';
+      document.getElementById('trainingTime').value = '2 hours/week';
+      document.getElementById('targetCapabilities').value = 'Automated real-time executive reporting dashboards and zero-touch cloud form provisioning.';
+      document.getElementById('resourceGaps').value = 'Dedicated staging sandbox for testing cross-agency API integrations prior to production rollout.';
+
+      // Visual feedback on the Test Fill buttons
+      ['testFillBtnTop', 'testFillBtnBottom'].forEach(id => {
+        const b = document.getElementById(id);
+        if (b) {
+          const orig = b.innerHTML;
+          b.innerHTML = '✓ Test Data Filled!';
+          b.style.background = '#ecfdf5';
+          b.style.borderColor = '#10b981';
+          b.style.color = '#059669';
+          setTimeout(() => {
+            b.innerHTML = orig;
+            b.style.background = '';
+            b.style.borderColor = '';
+            b.style.color = '';
+          }, 2200);
+        }
+      });
+    }
+
     // --- 1. Toggle Interviewer Field ---
     function toggleInterviewerField() {
       const mode = document.querySelector('input[name="completedBy"]:checked').value;
